@@ -4,14 +4,13 @@
 importScripts('./scheduler.js');
 
 const CACHE_NAME = 'n8n-scheduler-v1';
-const BASE = '/n8n-scheduler';
 const CACHED_URLS = [
-  BASE + '/',
-  BASE + '/index.html',
-  BASE + '/style.css',
-  BASE + '/app.js',
-  BASE + '/scheduler.js',
-  BASE + '/manifest.json',
+  '/',
+  '/index.html',
+  '/style.css',
+  '/app.js',
+  '/scheduler.js',
+  '/manifest.json',
 ];
 
 const DB_NAME = 'n8n-scheduler-db';
@@ -129,9 +128,9 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
     self.clients.matchAll({ type: 'window' }).then((clients) => {
-      const appUrl = BASE + '/';
+      const appUrl = '/';
       for (const client of clients) {
-        if (client.url.startsWith(self.location.origin + BASE) && 'focus' in client) {
+        if (client.url.startsWith(self.location.origin) && 'focus' in client) {
           return client.focus();
         }
       }

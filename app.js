@@ -1,6 +1,6 @@
 // app.js — Main application logic
 
-const BASE = '/n8n-scheduler';
+const BASE = '';
 const CONFIG_KEY = 'n8n_scheduler_config';
 const DB_NAME = 'n8n-scheduler-db';
 const DB_VERSION = 1;
@@ -79,8 +79,8 @@ async function saveConfig() {
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   try {
-    swRegistration = await navigator.serviceWorker.register(BASE + '/sw.js', {
-      scope: BASE + '/',
+    swRegistration = await navigator.serviceWorker.register('/sw.js', {
+      scope: '/',
     });
 
     // Listen for messages from SW (webhook results)
