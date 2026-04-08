@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#6c63ff" />
+  <meta name="description" content="Schedule and trigger n8n workflows from your browser" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>n8n Scheduler</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+
+    <!-- Header + Tabs -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="app-logo">n</div>
+        <div>
+          <div class="app-title">n8n Scheduler</div>
+          <div class="app-subtitle">Automate your workflows</div>
+        </div>
+      </div>
+      <nav class="tab-bar" role="tablist">
+        <button class="tab-btn active" role="tab" data-panel="panel-scheduler" aria-selected="true">
+          Scheduler
+        </button>
+        <button class="tab-btn" role="tab" data-panel="panel-form" aria-selected="false">
+          Form
+        </button>
+      </nav>
+    </header>
+
+    <!-- Status bar (feature badges) -->
+    <div class="status-bar" role="status" aria-live="polite">
+      <span id="sync-badge" class="badge badge-off">Background sync: Checking…</span>
+      <span id="notif-badge" class="badge badge-off">Notifications: Checking…</span>
+    </div>
+
+    <!-- Main content -->
+    <main class="app-main">
+
+      <!-- ── Scheduler Panel ──────────────────────────────────────────────── -->
+      <div id="panel-scheduler" class="tab-panel" role="tabpanel">
+
+        <!-- Status card -->
+        <div class="card">
+          <div class="card-title">Status</div>
+          <div class="status-grid">
+            <div class="status-item">
+              <div class="status-item-label">Last Run</div>
+              <div class="status-item-value">
+                <span id="last-run">Never</span>
+                <span id="last-run-status" class="status-icon"></span>
+              </div>
+            </div>
+            <div class="status-item">
+              <div class="status-item-label">Next Run</div>
+              <div class="status-item-value">
+                <span id="next-run">—</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="btn-row">
+            <button id="fire-now-btn" class="btn btn-primary">Fire Now</button>
+          </div>
+        </div>
+
+        <!-- Webhook URL card -->
+        <div class="card">
+          <div class="card-title">Webhook</div>
+
+          <div class="field">
+            <label for="webhook-url">n8n Webhook URL</label>
+            <input
+              type="url"
+              id="webhook-url"
+              placeholder="https://your-n8n.com/webhook/abc123"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <div class="field-hint">POST request will be sent to this URL on each trigger.</div>
+          </div>
+
+          <div class="toggle-row">
+            <span class="toggle-label">Enabled</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="enabled-toggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Schedule card -->
+        <div class="card">
+          <div class="card-title">Schedule</div>
+
+          <!-- Schedule type selector -->
+          <div class="schedule-type-group" role="group" aria-label="Schedule type">
+            <label class="schedule-type-label">
+              <input type="radio" name="schedule-type" value="interval" checked />
+              Fixed Interval
+            </label>
+            <label class="schedule-type-label">
+              <input type="radio" name="schedule-type" value="weekly" />
+              Daily at Time
+            </label>
+            <label class="schedule-type-label">
+              <input type="radio" name="schedule-type" value="once" />
+              One-time
+            </label>
+          </div>
+
+          <!-- Interval fields -->
+          <div id="fields-interval">
+            <div class="field">
+              <label for="interval-minutes">Every (minutes)</label>
+              <input
+                type="number"
+                id="interval-minutes"
+                value="60"
+                min="1"
+                max="10080"
+                placeholder="60"
+              />
+              <div class="field-hint">
+                Minimum ~60 min for background sync. Sub-hourly requires the tab to stay open.
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly fields -->
+          <div id="fields-weekly" hidden>
+            <div class="field">
+              <label for="weekly-time">Time of day (24h)</label>
+              <input type="time" id="weekly-time" value="09:00" />
+            </div>
+            <div class="field">
+              <label>Days of week</label>
+              <div class="day-chips" role="group" aria-label="Days of week">
+                <button class="day-chip" data-day="0" type="button" aria-label="Sunday">Su</button>
+                <button class="day-chip active" data-day="1" type="button" aria-label="Monday">Mo</button>
+                <button class="day-chip active" data-day="2" type="button" aria-label="Tuesday">Tu</button>
+                <button class="day-chip active" data-day="3" type="button" aria-label="Wednesday">We</button>
+                <button class="day-chip active" data-day="4" type="button" aria-label="Thursday">Th</button>
+                <button class="day-chip active" data-day="5" type="button" aria-label="Friday">Fr</button>
+                <button class="day-chip" data-day="6" type="button" aria-label="Saturday">Sa</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Once fields -->
+          <div id="fields-once" hidden>
+            <div class="field">
+              <label for="once-datetime">Fire at</label>
+              <input type="datetime-local" id="once-datetime" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button id="save-btn" class="btn btn-primary">Save &amp; Apply</button>
+          </div>
+        </div>
+
+        <!-- Limitations info -->
+        <details class="card" style="cursor:pointer;">
+          <summary style="font-size:13px;font-weight:600;color:var(--text-muted);user-select:none;">
+            Limitations &amp; Notes
+          </summary>
+          <ul style="margin-top:12px;padding-left:18px;font-size:13px;color:var(--text-muted);display:flex;flex-direction:column;gap:6px;">
+            <li><strong>Background sync</strong> requires installing this app to your home screen (Android/Chrome). Without it, the tab must remain open for scheduled triggers.</li>
+            <li><strong>iOS</strong> requires the app to be added to the home screen (iOS 16.4+) for background sync. Background sync may still be limited.</li>
+            <li><strong>Minimum interval</strong> for background sync in Chrome is ~1 hour. For sub-hourly triggers, keep the tab open.</li>
+            <li><strong>CORS</strong>: Your n8n webhook must allow requests from <code>savvaputilkin8.github.io</code>. n8n webhook triggers allow this by default.</li>
+            <li><strong>n8n form embed</strong> may fail if your n8n instance has restrictive <code>X-Frame-Options</code> headers.</li>
+          </ul>
+        </details>
+
+      </div><!-- /panel-scheduler -->
+
+      <!-- ── Form Panel ───────────────────────────────────────────────────── -->
+      <div id="panel-form" class="tab-panel form-tab-panel" hidden role="tabpanel">
+
+        <!-- Form URL settings -->
+        <div class="card">
+          <div class="card-title">Embedded Form</div>
+          <div class="field">
+            <label for="form-url">n8n Form URL</label>
+            <input
+              type="url"
+              id="form-url"
+              placeholder="https://your-n8n.com/form/xyz"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <div class="field-hint">Paste the public URL of your n8n form (Production mode must be active).</div>
+          </div>
+          <div class="btn-row">
+            <button id="save-btn-form" class="btn btn-primary">Apply</button>
+          </div>
+        </div>
+
+        <!-- Iframe placeholder / embed -->
+        <div id="form-placeholder" class="form-placeholder">
+          <div class="form-placeholder-icon">📋</div>
+          <div class="form-placeholder-title">No form configured</div>
+          <div class="form-placeholder-hint">Enter your n8n form URL above and click Apply.</div>
+        </div>
+
+        <iframe
+          id="n8n-form-frame"
+          hidden
+          title="n8n Workflow Form"
+          frameborder="0"
+          sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
+          allow="camera; microphone"
+          loading="lazy"
+        ></iframe>
+
+      </div><!-- /panel-form -->
+
+    </main>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <script src="scheduler.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Wire up the "Apply" button on the Form tab
+    document.getElementById('save-btn-form')?.addEventListener('click', () => {
+      const formUrlEl = document.getElementById('form-url');
+      if (formUrlEl) {
+        // Use the global config + saveSettings partial
+        const iframe = document.getElementById('n8n-form-frame');
+        const placeholder = document.getElementById('form-placeholder');
+        const url = formUrlEl.value.trim();
+        // Update config and persist
+        const raw = localStorage.getItem('n8n_scheduler_config');
+        let cfg = {};
+        try { cfg = raw ? JSON.parse(raw) : {}; } catch(_) {}
+        cfg.formUrl = url;
+        localStorage.setItem('n8n_scheduler_config', JSON.stringify(cfg));
+        if (url) {
+          iframe.src = url;
+          iframe.hidden = false;
+          placeholder.hidden = true;
+        } else {
+          iframe.hidden = true;
+          placeholder.hidden = false;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
