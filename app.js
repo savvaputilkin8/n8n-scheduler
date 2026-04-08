@@ -6,11 +6,14 @@ const DB_NAME = 'n8n-scheduler-db';
 const DB_VERSION = 1;
 const STORE_NAME = 'config';
 
+const WEBHOOK_URL = 'https://savva.app.n8n.cloud/webhook/a921ae95-c8a9-49eb-8381-2d4f1281c3da';
+const FORM_URL = 'https://savva.app.n8n.cloud/form/464db48f-e8ec-4e2a-a1cd-49fba201515d';
+
 // ── Default config ────────────────────────────────────────────────────────────
 
 const DEFAULT_CONFIG = {
-  webhookUrl: '',
-  formUrl: '',
+  webhookUrl: WEBHOOK_URL,
+  formUrl: FORM_URL,
   schedule: {
     type: 'interval',
     minutes: 60,
@@ -59,6 +62,9 @@ function loadConfig() {
     const stored = localStorage.getItem(CONFIG_KEY);
     if (stored) config = { ...DEFAULT_CONFIG, ...JSON.parse(stored) };
   } catch (_) {}
+  // Always enforce hard-coded URLs
+  config.webhookUrl = WEBHOOK_URL;
+  config.formUrl = FORM_URL;
 }
 
 async function saveConfig() {
@@ -346,12 +352,11 @@ function updateFormIframe() {
 // ── Settings save ─────────────────────────────────────────────────────────────
 
 async function saveSettings() {
-  const urlEl = document.getElementById('webhook-url');
-  const formUrlEl = document.getElementById('form-url');
   const enabledEl = document.getElementById('enabled-toggle');
 
-  config.webhookUrl = urlEl ? urlEl.value.trim() : config.webhookUrl;
-  config.formUrl = formUrlEl ? formUrlEl.value.trim() : config.formUrl;
+  // URLs are hard-coded — always use constants
+  config.webhookUrl = WEBHOOK_URL;
+  config.formUrl = FORM_URL;
   config.enabled = enabledEl ? enabledEl.checked : config.enabled;
 
   // Schedule type

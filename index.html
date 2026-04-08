@@ -71,21 +71,9 @@
           </div>
         </div>
 
-        <!-- Webhook URL card -->
+        <!-- Enable / disable card -->
         <div class="card">
           <div class="card-title">Webhook</div>
-
-          <div class="field">
-            <label for="webhook-url">n8n Webhook URL</label>
-            <input
-              type="url"
-              id="webhook-url"
-              placeholder="https://your-n8n.com/webhook/abc123"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <div class="field-hint">POST request will be sent to this URL on each trigger.</div>
-          </div>
 
           <div class="toggle-row">
             <span class="toggle-label">Enabled</span>
@@ -176,7 +164,6 @@
             <li><strong>Background sync</strong> requires installing this app to your home screen (Android/Chrome). Without it, the tab must remain open for scheduled triggers.</li>
             <li><strong>iOS</strong> requires the app to be added to the home screen (iOS 16.4+) for background sync. Background sync may still be limited.</li>
             <li><strong>Minimum interval</strong> for background sync in Chrome is ~1 hour. For sub-hourly triggers, keep the tab open.</li>
-            <li><strong>CORS</strong>: Your n8n webhook must allow requests from <code>savvaputilkin8.github.io</code>. n8n webhook triggers allow this by default.</li>
             <li><strong>n8n form embed</strong> may fail if your n8n instance has restrictive <code>X-Frame-Options</code> headers.</li>
           </ul>
         </details>
@@ -186,35 +173,9 @@
       <!-- ── Form Panel ───────────────────────────────────────────────────── -->
       <div id="panel-form" class="tab-panel form-tab-panel" hidden role="tabpanel">
 
-        <!-- Form URL settings -->
-        <div class="card">
-          <div class="card-title">Embedded Form</div>
-          <div class="field">
-            <label for="form-url">n8n Form URL</label>
-            <input
-              type="url"
-              id="form-url"
-              placeholder="https://your-n8n.com/form/xyz"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <div class="field-hint">Paste the public URL of your n8n form (Production mode must be active).</div>
-          </div>
-          <div class="btn-row">
-            <button id="save-btn-form" class="btn btn-primary">Apply</button>
-          </div>
-        </div>
-
-        <!-- Iframe placeholder / embed -->
-        <div id="form-placeholder" class="form-placeholder">
-          <div class="form-placeholder-icon">📋</div>
-          <div class="form-placeholder-title">No form configured</div>
-          <div class="form-placeholder-hint">Enter your n8n form URL above and click Apply.</div>
-        </div>
-
         <iframe
           id="n8n-form-frame"
-          hidden
+          src="https://savva.app.n8n.cloud/form/464db48f-e8ec-4e2a-a1cd-49fba201515d"
           title="n8n Workflow Form"
           frameborder="0"
           sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
@@ -232,31 +193,5 @@
 
   <script src="scheduler.js"></script>
   <script src="app.js"></script>
-  <script>
-    // Wire up the "Apply" button on the Form tab
-    document.getElementById('save-btn-form')?.addEventListener('click', () => {
-      const formUrlEl = document.getElementById('form-url');
-      if (formUrlEl) {
-        // Use the global config + saveSettings partial
-        const iframe = document.getElementById('n8n-form-frame');
-        const placeholder = document.getElementById('form-placeholder');
-        const url = formUrlEl.value.trim();
-        // Update config and persist
-        const raw = localStorage.getItem('n8n_scheduler_config');
-        let cfg = {};
-        try { cfg = raw ? JSON.parse(raw) : {}; } catch(_) {}
-        cfg.formUrl = url;
-        localStorage.setItem('n8n_scheduler_config', JSON.stringify(cfg));
-        if (url) {
-          iframe.src = url;
-          iframe.hidden = false;
-          placeholder.hidden = true;
-        } else {
-          iframe.hidden = true;
-          placeholder.hidden = false;
-        }
-      }
-    });
-  </script>
 </body>
 </html>
